@@ -7,3 +7,4 @@ OUTPUT
 */temp
 
 *.pdf
+*debug*

@@ -12,6 +12,15 @@ tree_depth <- function(self) {
   }
 }
 
+# 寻找孤儿节点
+TreeDepth <- function(tree) {
+  ids <- tree$Get("name")
+  depths <- tree$Get("depth") # not used
+  n <- length(ids)
+  data.table(grid = as.integer(ids[2:n]), depth = depths[2:n]) %>%
+    arrange(grid)
+}
+
 # 奠定数据基础
 find_children <- function(df, root = 0) {
   children <- df[iddown == root, id] %>% unique()
@@ -27,15 +36,6 @@ find_children <- function(df, root = 0) {
   } else {
     return(list())
   }
-}
-
-# 寻找孤儿节点
-TreeDepth <- function(tree) {
-  ids <- tree$Get("name")
-  depths <- tree$Get("depth") # not used
-  n <- length(ids)
-  data.table(grid = as.integer(ids[2:n]), depth = depths[2:n]) %>%
-    arrange(grid)
 }
 
 # df <- fread(file_basinId)

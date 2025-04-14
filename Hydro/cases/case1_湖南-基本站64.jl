@@ -4,7 +4,7 @@ includet("Z:/GitHub/jl-pkgs/apps.jl/Hydro/snap_vis.jl")
 
 ## Step1: snap pour points =====================================================
 @time ra_accu = rast("data-raw/merit_Hunan_flowaccu.tif")
-st = fread("data-raw/湖南-基本站64.csv")
+st = fread("data-raw/st_湖南-基本站64.csv")
 
 kw = (; perc_min=0.7, perc_max=1.3)
 options = Dict(

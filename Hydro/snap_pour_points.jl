@@ -6,7 +6,9 @@ include("main_sf.jl")
 function snap_pour(point, ra_accu; win_half::Int=25,
   area_obs, 
   perc_min=0.7, perc_max=1.3,
-  accu_min=1000)
+  accu_min=1000, 
+  order_by = [:dist], 
+  name="", ignore...)
 
   cellsize = st_cellsize(ra_accu)
   _area = cellArea(point..., cellsize) # 单个网格面积
@@ -27,15 +29,23 @@ function snap_pour(point, ra_accu; win_half::Int=25,
   d.perc = d.value / accu_target
   d.dist = earth_dist(point, Matrix(d[:, 1:2]))
 
-  # perc_min, perc_max = 1 - bias_max, 1 + bias_max
+  ## 如果找不到则，降低标准
   con = @. (d.value > accu_min && d.perc >= perc_min && d.perc <= perc_max)
   d2 = d[con, :]
 
-  info = d2[sortperm(d2.dist), :]
-  info.target .= accu_target
-  info.area_obs .= area_obs
-  info.bias_abs .= round.(abs.(info.perc .- 1) .* 100, digits=2)
+  if (nrow(d2) == 0) 
+    println("[w]: $name")
+    perc_min = 0.3
+    perc_max = 2 - perc_min
+    con = @. (d.value > accu_min && d.perc >= perc_min && d.perc <= perc_max)
+    d2 = d[con, :]
+  end
+  d2.target .= accu_target
+  d2.area_obs .= area_obs
+  d2.bias_abs .= round.(abs.(d2.perc .- 1) .* 100, digits=2)
 
+  # info = d2[sortperm(d2.dist), :]
+  info = sort(d2, order_by)  
   info = info[:, Cols(:lon_adj, :lat_adj, :area_obs, :value, :target, :perc, :bias_abs, 1:end)]
 
   lon_adj, lat_adj = info[1, 1:2]
@@ -68,14 +78,14 @@ options = Dict(
 function main_snap(ra_accu, st; options = Dict(), kw...)
   sites_option = keys(options) |> collect
 
-  lst = @showprogress map(k -> begin
+  lst = map(k -> begin
       origin = st.lon[k], st.lat[k]
       name = st.name[k]
       area_obs = st.area[k]
       _kw = kw
       name in sites_option && (_kw = options[name])
       
-      r = snap_pour(origin, ra_accu; area_obs, _kw...)
+      r = snap_pour(origin, ra_accu; area_obs, name,  _kw...)
     end, 1:nrow(st))
 
   info = vcat(map(r -> r.info, lst)...)

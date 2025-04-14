@@ -36,9 +36,12 @@ function plot_snap(lst, info; inspector=false)
   fig = Figure(; size=(1400, 800))
   plt = nothing
   axs = []
+  N = length(lst)
 
   for i in 1:nx, j in 1:ny
     k = (i - 1) * ny + j
+    k > N && break
+    
     r = lst[k]
     ax, _plt = plot_snap_site(fig[i, j], r)
     push!(axs, ax)
