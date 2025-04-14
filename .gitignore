@@ -1,0 +1,9 @@
+data
+data-raw
+OUTPUT
+
+*.tif
+*.png
+*/temp
+
+*.pdf
